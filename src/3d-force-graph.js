@@ -6,7 +6,7 @@ const three = window.THREE
 
 import ThreeDragControls from 'three-dragcontrols';
 import ThreeForceGraph from 'three-forcegraph';
-import ThreeRenderObjects from 'three-render-objects';
+import ThreeRenderObjects from './three-render-objects.js';
 
 import accessorFn from 'accessor-fn';
 import Kapsule from 'kapsule';

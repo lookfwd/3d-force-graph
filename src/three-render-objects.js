@@ -37,6 +37,8 @@ const ThreeOrbitControls = OrbitControlsWrapper(three);
 import FlyControlsWrapper from 'three-fly-controls';
 const ThreeFlyControls = (FlyControlsWrapper(three), three.FlyControls);
 
+import hp from './holoplay.js';
+
 import { parseToRgb, opacify } from 'polished';
 import TWEEN from '@tweenjs/tween.js';
 
@@ -85,7 +87,9 @@ export default Kapsule({
     tick: function(state) {
       if (state.initialised) {
         state.controls.update && state.controls.update();
-        state.renderer.render(state.scene, state.camera);
+
+        //state.renderer.render(state.scene, state.camera);
+        state.holoplay.render();
 
         if (state.enablePointerInteraction) {
           // Update tooltip and trigger onHover events
@@ -266,6 +270,16 @@ export default Kapsule({
     if (bckgAlpha === undefined) bckgAlpha = 1;
     state.renderer.setClearColor(new three.Color(opacify(1, state.backgroundColor)), bckgAlpha);
     state.container.appendChild(state.renderer.domElement);
+
+	state.holoplay = new hp(state.scene, state.camera, state.renderer);
+
+      window.addEventListener('resize', function(){
+        var width = window.innerWidth;
+        var height = window.innerHeight;
+        state.renderer.setSize(width, height);
+        state.camera.aspect = width/height;
+        state.camera.updateProjectionMatrix();
+      });
 
     // configure controls
     state.controls = new ({
