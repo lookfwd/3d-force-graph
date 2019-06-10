@@ -14,6 +14,74 @@ module.exports = function( THREE ) {
 //    Zoom - middle mouse, or mousewheel / touch: two finger spread or squish
 //    Pan - right mouse, or arrow keys / touch: three finter swipe
 
+
+let prevType = 0, type = 0;
+let x0 = 0, y0 = 0, z0 = 0, rotateX0 = 0, rotateY0 = 0;
+
+let dx = 0;
+let dy = 0;
+let dz = 0;
+let drx = 0;
+let dry = 0;
+
+let leapx = 0;
+let leapy = 0;
+let leapz = 0;
+
+let innerPrev = 0;
+
+
+// Loosly based on https://bit.ly/2I4kxRq
+Leap.loop({}, function( frame ) 
+{	
+	let handData = frame.hands[0];
+	
+	if ( !handData)
+	{
+		prevType = 0;
+		return;
+	}
+	
+	if (!handData.thumb.extended && !handData.indexFinger.extended) {
+		type = 1;
+	}
+	else if (!handData.thumb.extended && !handData.middleFinger.extended) {
+		type = 3;
+	}
+	else if (!handData.thumb.extended) {
+		type = 2;
+	}
+	else {
+		type = 4;
+	}
+
+	// position
+	leapx = handData.palmPosition[0]
+	leapy = handData.palmPosition[1] - 200
+	leapz = handData.palmPosition[2]
+
+	let rotateX = Math.atan2( handData.palmNormal[1], -handData.palmNormal[2] );
+	let rotateY = -Math.atan2( handData.palmNormal[0], -handData.palmNormal[1] );	
+
+	if (prevType != type) {
+		x0 = leapx;
+		y0 = leapy;
+		z0 = leapz;
+		rotateX0 = rotateX;
+		rotateY0 = rotateY;
+		prevType = type;
+		
+	}
+
+	dx = Math.round(leapx - x0);
+	dy = Math.round(leapy - y0);
+	dz = Math.round(leapz - z0);
+	drx = Math.round((rotateX-rotateX0) * 100) / 100;
+	dry = Math.round((rotateY-rotateY0) * 100) / 100;
+});
+
+
+
 	function OrbitControls( object, domElement ) {
 
 		this.object = object;
@@ -125,6 +193,35 @@ module.exports = function( THREE ) {
 			var lastQuaternion = new THREE.Quaternion();
 
 			return function update () {
+
+				// Leap motion controls
+
+				if (prevType == 1) {
+					let zoomSpeed = 0.99;
+					if ( dz < 0 ) {
+						dollyOut( zoomSpeed );
+					} else if ( dz > 0 ) {
+						dollyIn( zoomSpeed );
+					}
+				}
+				else if (prevType == 2) {
+					let amplify = 5;
+					let ievent = {clientX: leapx*amplify, clientY: leapz*amplify};
+					if (innerPrev != 2) {
+						handleMouseDownRotate(ievent);
+					}
+					handleMouseMoveRotate(ievent, true);
+				}
+				else if (prevType == 3) {
+					let amplify = 3;
+					let ievent = {clientX: leapx*amplify, clientY: leapz*amplify};
+					if (innerPrev != 3) {
+						handleMouseDownPan(ievent);
+					}
+					handleMouseMovePan(ievent, true);
+				}
+				innerPrev = prevType;
+	
 
 				var position = scope.object.position;
 
@@ -358,6 +455,9 @@ module.exports = function( THREE ) {
 			};
 
 		}();
+		
+		function getScale() { return scale; }
+		function setScale(i) {scale = i; }
 
 		function dollyIn( dollyScale ) {
 
@@ -429,7 +529,7 @@ module.exports = function( THREE ) {
 
 		}
 
-		function handleMouseMoveRotate( event ) {
+		function handleMouseMoveRotate( event, suppressUpdate ) {
 
 			//console.log( 'handleMouseMoveRotate' );
 
@@ -446,6 +546,7 @@ module.exports = function( THREE ) {
 
 			rotateStart.copy( rotateEnd );
 
+			if (!suppressUpdate)
 			scope.update();
 
 		}
@@ -474,7 +575,7 @@ module.exports = function( THREE ) {
 
 		}
 
-		function handleMouseMovePan( event ) {
+		function handleMouseMovePan( event, suppressUpdate ) {
 
 			//console.log( 'handleMouseMovePan' );
 
@@ -486,6 +587,7 @@ module.exports = function( THREE ) {
 
 			panStart.copy( panEnd );
 
+			if (!suppressUpdate)
 			scope.update();
 
 		}

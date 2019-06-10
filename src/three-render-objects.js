@@ -83,13 +83,17 @@ export default Kapsule({
     onRightClick: { triggerUpdate: false }
   },
 
-  methods: {
-    tick: function(state) {
+  methods: {    tick: function(state) {
+
       if (state.initialised) {
         state.controls.update && state.controls.update();
 
-        //state.renderer.render(state.scene, state.camera);
-        state.holoplay.render();
+		if (false) {
+			state.renderer.render(state.scene, state.camera);
+		}
+		else {
+			state.holoplay.render();
+		}
 
         if (state.enablePointerInteraction) {
           // Update tooltip and trigger onHover events
@@ -283,7 +287,7 @@ export default Kapsule({
 
     // configure controls
     state.controls = new ({
-      trackball: ThreeTrackballControls,
+      trackball: ThreeOrbitControls,
       orbit: ThreeOrbitControls,
       fly: ThreeFlyControls
     }[controlType])(state.camera, state.renderer.domElement);
