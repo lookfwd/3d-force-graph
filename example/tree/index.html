@@ -7,6 +7,7 @@
   <script src="//unpkg.com/d3-force-3d"></script>
 
   <!--<script src="//unpkg.com/3d-force-graph"></script>-->
+  <script src="../../src/leap-0.6.4.js"></script>
   <script src="../../dist/3d-force-graph.js"></script>
 </head>
 
@@ -39,7 +40,7 @@
       .d3Force('collision', d3.forceCollide(node => Math.cbrt(node.size) * NODE_REL_SIZE))
       .d3VelocityDecay(0.3);
 
-    fetch('../datasets/d3-dependencies.csv')
+    fetch('../datasets/d3-dependencies-small.csv')
       .then(r => r.text())
       .then(d3.csvParse)
       .then(data => {

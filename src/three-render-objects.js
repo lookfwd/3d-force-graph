@@ -32,7 +32,7 @@ const three = window.THREE
 };
 
 import ThreeTrackballControls from 'three-trackballcontrols';
-import OrbitControlsWrapper from 'three-orbit-controls';
+import OrbitControlsWrapper from './my-three-orbit-controls';
 const ThreeOrbitControls = OrbitControlsWrapper(three);
 import FlyControlsWrapper from 'three-fly-controls';
 const ThreeFlyControls = (FlyControlsWrapper(three), three.FlyControls);
